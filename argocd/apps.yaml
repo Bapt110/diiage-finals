@@ -1,0 +1,71 @@
+# --- Application 1 : Backend ---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: diiage-backend
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Bapt110/diiage-finals
+    targetRevision: main
+    path: app/chart  # Chemin du backend
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: diiage-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Crée le namespace 'diiage-app' s'il n'existe pas
+
+---
+# --- Application 2 : Traffic Generator ---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: diiage-traffic-gen
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Bapt110/diiage-finals
+    targetRevision: main
+    path: traffic-gen-app/chart  # Chemin du générateur
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: diiage-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
+---
+# --- Application 3 : Monitoring Stack ---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: diiage-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Bapt110/diiage-finals
+    targetRevision: main
+    path: monitoring/chart  # Chemin du monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true # Crée le namespace 'monitoring' s'il n'existe pas
