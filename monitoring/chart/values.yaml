@@ -30,7 +30,7 @@ opentelemetryCollector:
       cpu: 100m
       memory: 256Mi
   exporters:
-    tempoEndpoint: tempo.monitoring.svc.cluster.local:4317
+    tempoEndpoint: diiage-monitoring-tempo.monitoring.svc.cluster.local:4317
     prometheusEndpoint: http://diiage-monitoring-prometheus-server.monitoring.svc.cluster.local:80/api/v1/write
 
 # Prometheus configuration
@@ -202,7 +202,7 @@ grafana:
         - name: Tempo
           type: tempo
           access: proxy
-          url: http://tempo:3200
+          url: http://diiage-monitoring-tempo:3200
           isDefault: false
           editable: true
           jsonData:
@@ -215,7 +215,7 @@ grafana:
         - name: Tempo (Search)
           type: tempo
           access: proxy
-          url: http://tempo:3200
+          url: http://diiage-monitoring-tempo:3200
           isDefault: false
           editable: true
           jsonData:
