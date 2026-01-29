@@ -1,0 +1,49 @@
+{{- if .Values.opentelemetryCollector.enabled -}}
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: {{ .Values.opentelemetryCollector.name }}
+  namespace: {{ .Values.global.namespace | default "monitoring" }}
+spec:
+  mode: deployment # Important : Mode Deployment pour un collecteur central
+  image: {{ .Values.opentelemetryCollector.image }}
+  resources:
+    {{- toYaml .Values.opentelemetryCollector.resources | nindent 4 }}
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+      # Scrape le collector lui-même pour les métriques internes (port 8888)
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otel-collector'
+              scrape_interval: 10s
+              static_configs:
+                - targets: ['0.0.0.0:8888']
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: {{ .Values.opentelemetryCollector.exporters.tempoEndpoint }}
+        tls:
+          insecure: true
+      prometheus:
+        endpoint: "0.0.0.0:8889" # Exporte les métriques vers Prometheus
+        # Note: Si vous utilisez prometheus remotewrite, utilisez l'exporter 'prometheusremotewrite'
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [batch]
+          exporters: [prometheus] # Ou logging pour debug
+{{- end -}}
