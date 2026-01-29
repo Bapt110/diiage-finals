@@ -25,11 +25,11 @@ backend:
     createConfigMap: true
     configmapData:
       feature_x: "enabled"
-      
-serviceAccount:
-  create: true
-  name: "monitor-sa" # Nom explicite pour le debugging
       feature_y: "disabled"
       debug_mode: "false"
       api_timeout_seconds: "30"
       cache_ttl: "3600"
+
+  serviceAccount:
+    create: true
+    name: "monitor-sa" # Nom explicite pour le debugging
