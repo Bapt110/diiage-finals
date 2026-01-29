@@ -17,7 +17,7 @@ opentelemetry-operator:
         repository: ghcr.io/open-telemetry/opentelemetry-go-instrumentation/autoinstrumentation-go
         tag: v0.23.0
 
-# OpenTelemetry Collector CRD (managed by operator)
+# OpenTelemetry Collector CRD (Custom configuration used by our template)
 opentelemetryCollector:
   enabled: true
   name: monitoring-collector
@@ -30,6 +30,7 @@ opentelemetryCollector:
       cpu: 100m
       memory: 256Mi
   exporters:
+    # Cibles pour l'export des données
     tempoEndpoint: diiage-monitoring-tempo.monitoring.svc.cluster.local:4317
     prometheusEndpoint: http://diiage-monitoring-prometheus-server.monitoring.svc.cluster.local:80/api/v1/write
 
@@ -72,13 +73,15 @@ prometheus:
     emptyDir:
       sizeLimit: ""
   
-  # Prometheus 28: serverFiles is top-level (sibling of server)
+  # Scrape Configs
   serverFiles:
     prometheus.yml:
       scrape_configs:
         - job_name: 'otel-collector'
           static_configs:
-            - targets: ['monitoring-collector.monitoring.svc.cluster.local:8888']
+            # Note: Si le service créé par l'opérateur a un nom différent (ex: suffixe -collector), ajustez ici.
+            # Vérifiez avec `kubectl get svc -n monitoring`
+            - targets: ['monitoring-collector-collector.monitoring.svc.cluster.local:8888']
         
         - job_name: 'backend'
           kubernetes_sd_configs:
@@ -131,7 +134,7 @@ tempo:
     
     server:
       http_listen_port: 3200
-    
+
     receivers:
       otlp:
         protocols:
@@ -140,6 +143,25 @@ tempo:
           http:
             endpoint: 0.0.0.0:4318
   
+  # --- CORRECTION MAJEURE ICI ---
+  # Expose explicitement les ports dans le Service Kubernetes
+  service:
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3200
+        targetPort: 3200
+        protocol: TCP
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP
+  # ------------------------------
+
   persistence:
     enabled: false
   
