@@ -29,7 +29,7 @@ spec:
                 - targets: ['0.0.0.0:8888']
 
     processors:
-      batch:
+      batch: {} # CORRECTION : Accolades vides nécessaires
       memory_limiter:
         check_interval: 1s
         limit_mib: 400
@@ -43,7 +43,6 @@ spec:
           insecure: true
       
       # Export vers Prometheus (Metrics) - Mode Remote Write (PUSH)
-      # Requis car votre URL est /api/v1/write
       prometheusremotewrite:
         endpoint: "{{ .Values.opentelemetryCollector.exporters.prometheusEndpoint }}"
         tls:
