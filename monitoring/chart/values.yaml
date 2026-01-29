@@ -78,7 +78,7 @@ prometheus:
       scrape_configs:
         - job_name: 'otel-collector'
           static_configs:
-            - targets: ['diiage-monitoring-prometheus-server.monitoring.svc.cluster.local:8888']
+            - targets: ['monitoring-collector.monitoring.svc.cluster.local:8888']
         
         - job_name: 'backend'
           kubernetes_sd_configs:
